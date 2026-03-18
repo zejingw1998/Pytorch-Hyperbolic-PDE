@@ -4,7 +4,7 @@ Private repository for studying hyperbolic PDEs with PyTorch, including conserva
 
 # Torch Hyperbolic PDE
 
-This is my private repository for studying hyperbolic partial differential equations with PyTorch.
+This is my public repository for studying hyperbolic partial differential equations with PyTorch.
 
 The main focus is on:
 - hyperbolic conservation laws
