@@ -33,6 +33,8 @@ dtype = torch.float64
 torch.set_default_dtype(dtype)
 
 USE_TORCH = TORCH_AVAILABLE  # True: torch and False: numpy
+
+
 # In Task 1.1 we keep the same periodic grid style as in Exercise 2b,
 # while in the later parts we use ghost cells for convenience.
 #Part 1
@@ -221,51 +223,8 @@ plt.title("Backward difference, a=-1")
 plt.grid(True)
 
 plt.show()
-# Part 2
-"""
-# Task 2.1
 
-# The centered Differences
-# The centered differences is defined as u_x= (u_i+1-u_i-1)/2 delta x
-# Consider the formula from the hints
 
-#Use the info from the hints
-#uun[0] = uun[nump-2]
-# uun[nump-1] = uun[1]
-def the_periodic_BC_hint(u):
-    u[0]  = u[-2]
-    u[-1] = u[1]
-    return u
-
-def centerd_derivative(u, dx):
-    du = torch.zeros_like(u)
-    du[1:-1] = (u[2:] - u[:-2]) / (2*dx)
-    return the_periodic_BC_hint(du)
-
-def run_centered_and_plot(N, a=1.0, cfl_cut=0.3, max_steps=2000):
-    dx = (xf - x0) / N
-    dt = cfl_cut * dx / abs(a)
-
-    x_phys = torch.linspace(x0, xf, N+1, device=device, dtype=dtype)
-
-    u = torch.empty(N+3, device=device, dtype=dtype)
-    u[1:-1] = u0(x_phys)
-    u = the_periodic(u)
-
-    max_hist = [torch.max(torch.abs(u[1:-1])).item()]
-
-    for _ in range(max_steps):
-        dudx = torch.zeros_like(u)
-        dudx[1:-1] = (u[2:] - u[:-2]) / (2*dx)
-
-        u[1:-1] = u[1:-1] - a * dt * dudx[1:-1]
-        u = the_periodic(u)
-
-        max_hist.append(torch.max(torch.abs(u[1:-1])).item())
-
-    return x_phys, u[1:-1], max_hist
-
-"""
 # Part 2
 # Centered differences from nm_lib
 
@@ -449,84 +408,8 @@ for cfl_cut in [0.5, 0.99, 1.01, 2.0]:
     plt.grid(True)
 
 plt.show()
-#Part 4 Burgers' Equation (Optional)
 
 
-
-
-
-# Part 4b  Forward Derivative and Lax Method
-# In this problem we consider the Inviscid Burgers' Equation
-
-# Task 4A Implement Burgers' Equation
-#Define the intial condition 
-
-def initial_burger(x):
-    #Parameter
-    A  = 1.0
-    xc = 0.7
-    W  = 0.1
-    B  = 0.3
-    return A*(torch.tanh((x+xc)/W) - torch.tanh((x-xc)/W)) + B
-
-
-def the_periodic(u):
-    u[0]  = u[-2]
-    u[-1] = u[1]
-    return u
-
-
-#Consider the Lax-Method 
-def step_uadv_burgers(u, dt, dx):
-
-    u_next = torch.zeros_like(u)
-
-    # flux f(u) = u^2/2 
-    f = 0.5 * u**2
-
-    # Lax-Friedrichs / Lax scheme
-    u_next[1:-1] = 0.5*(u[2:] + u[:-2]) - (dt/(2*dx))*(f[2:] - f[:-2])
-
-    #
-    u_next = the_periodic(u_next)
-    return u_next
-
-def evolv_uadv_burgers(N, tf=100.0, cfl_cut=0.5):
-    # [-1.4, 2.0]
-    x0, xf = -1.4, 2.0
-    dx = (xf - x0) / N
-
-
-    x_phys = torch.linspace(x0, xf, N+1, device=device, dtype=dtype)                                  
-
-  
-    u = torch.empty(N+3, device=device, dtype=dtype)
-    u[1:-1] = initial_burger(x_phys)
-    u = the_periodic(u)
-
-    t = 0.0
-    while t < tf:
-        umax = torch.max(torch.abs(u[1:-1])).item()
-        if umax < 1e-14:
-            break
-
-        dt = cfl_cut * dx / umax
-        if t + dt > tf:
-            dt = tf - t
-
-        u = step_uadv_burgers(u, dt, dx)
-        t += dt
-
-    return x_phys, u[1:-1]
-
-x, u_final = evolv_uadv_burgers(N=400, tf=100.0, cfl_cut=0.5)
-
-plt.figure()
-plt.plot(x.detach().cpu().numpy(), initial_burger(x).detach().cpu().numpy(), label="t=0")
-plt.plot(x.detach().cpu().numpy(), u_final.detach().cpu().numpy(), label="t=100")
-plt.grid(True); plt.legend()
-plt.show()
-# Task 4B Compare Methods for Burgers' Equation
 
 #Comment
 
@@ -564,3 +447,147 @@ plt.show()
 
 #max|u| grows rapidly and u(x) develops non-physical oscillations and spikes, Blows up.
 
+
+#Part 4 Burgers' Equation (Optional)
+
+# Part 4b  Forward Derivative and Lax Method
+# In this problem we consider the Inviscid Burgers' Equation
+
+# Task 4A Implement Burgers' Equation
+#Define the intial condition 
+
+def initial_burger(x,A =1.0): 
+    #Parameter
+    xc = 0.7
+    W  = 0.1
+    B  = 0.3
+    return A*(torch.tanh((x+xc)/W) - torch.tanh((x-xc)/W)) + B
+def the_periodic(u):
+    u[0]  = u[-2]
+    u[-1] = u[1]
+    return u
+#Consider the Lax-Method 
+def step_uadv_burgers(u, dt, dx):
+    u_next = torch.zeros_like(u)
+    # flux f(u) = u^2/2 
+    f = 0.5 * u**2
+    # Lax-Friedrichs / Lax scheme
+    u_next[1:-1] = 0.5*(u[2:] + u[:-2]) - (dt/(2*dx))*(f[2:] - f[:-2])
+    u_next = the_periodic(u_next)
+    return u_next
+def evolv_uadv_burgers(N, tf=1.0, cfl_cut=0.5,A=1.0):
+    # [-1.4, 2.0]
+    x0, xf = -1.4, 2.0
+    dx = (xf - x0) / N
+    x_phys = torch.linspace(x0, xf, N+1, device=device, dtype=dtype)                                  
+    u = torch.empty(N+3, device=device, dtype=dtype)
+    u[1:-1] = initial_burger(x_phys,A=A)
+    u = the_periodic(u)
+    t = 0.0
+    while t < tf:
+        umax = torch.max(torch.abs(u[1:-1])).item()
+        if umax < 1e-14:
+            break
+        dt = cfl_cut * dx / umax
+        if t + dt > tf:
+            dt = tf - t
+        u = step_uadv_burgers(u, dt, dx)
+        t += dt
+    return x_phys, u[1:-1]
+x, u_final = evolv_uadv_burgers(N=400, tf=1.0, cfl_cut=0.5)
+plt.figure()
+plt.plot(x.detach().cpu().numpy(), initial_burger(x).detach().cpu().numpy(), label="t=0")
+plt.plot(x.detach().cpu().numpy(), u_final.detach().cpu().numpy(), label="t=1")
+plt.grid(True); plt.legend()
+plt.show()
+
+
+
+# Task 4B Compare Methods for Burgers' Equation
+# Forward Derivative Method
+def step_uadv_burgers_forward(u, dt, dx):
+    u_next = u.clone()
+    # forward derivative version from the handout
+    # u_j^{n+1} = u_j^n - (dt/dx) u_j^n (u_j^n - u_{j+1}^n)
+    u_next[1:-1] = u[1:-1] - (dt / dx) * u[1:-1] * (u[1:-1] - u[2:])
+    u_next = the_periodic(u_next)
+    return u_next
+def evolv_uadv_burgers_forward(N, tf=1.0, cfl_cut=0.5, A=1.0):
+    # domain [-1.4, 2.0]
+    x0, xf = -1.4, 2.0
+    dx = (xf - x0) / N
+    x_phys = torch.linspace(x0, xf, N+1, device=device, dtype=dtype)
+    u = torch.empty(N+3, device=device, dtype=dtype)
+    u[1:-1] = initial_burger(x_phys, A=A)
+    u = the_periodic(u)
+    t = 0.0
+    while t < tf:
+        umax = torch.max(torch.abs(u[1:-1])).item()
+        if umax < 1e-14:
+            break
+        dt = cfl_cut * dx / umax
+        if t + dt > tf:
+            dt = tf - t
+        u = step_uadv_burgers_forward(u, dt, dx)
+        t += dt
+    return x_phys, u[1:-1]
+x = torch.linspace(-1.4, 2.0, 401, device=device, dtype=dtype)
+x_lax, u_lax = evolv_uadv_burgers(N=400, tf=1.0, cfl_cut=0.5, A=1.0)
+x_fwd, u_fwd = evolv_uadv_burgers_forward(N=400, tf=1.0, cfl_cut=0.5, A=1.0)
+plt.figure()
+plt.plot(x.detach().cpu().numpy(), initial_burger(x, A=1.0).detach().cpu().numpy(), label="t=0")
+plt.plot(x_lax.detach().cpu().numpy(), u_lax.detach().cpu().numpy(), label="Lax")
+plt.plot(x_fwd.detach().cpu().numpy(), u_fwd.detach().cpu().numpy(), label="Forward")
+plt.grid(True)
+plt.legend()
+plt.show()
+x_lax2, u_lax2 = evolv_uadv_burgers(N=400, tf=1.0, cfl_cut=0.5, A=-0.02)
+
+x_fwd2, u_fwd2 = evolv_uadv_burgers_forward(N=400, tf=1.0, cfl_cut=0.5, A=-0.02)
+
+plt.figure()
+plt.plot(x.detach().cpu().numpy(), initial_burger(x, A=-0.02).detach().cpu().numpy(), label="t=0")
+plt.plot(x_lax2.detach().cpu().numpy(), u_lax2.detach().cpu().numpy(), label="Lax")
+plt.plot(x_fwd2.detach().cpu().numpy(), u_fwd2.detach().cpu().numpy(), label="Forward")
+plt.grid(True)
+plt.legend()
+plt.show()
+
+#Comment
+
+
+# For Burgers' equation, the local propagation speed is a = u.
+# This means that larger values of u move faster than smaller values,
+# so compressive parts of the profile steepen and may develop into shock-like fronts.
+#
+# The Lax method is based on the conservative form
+# u_t + (u^2 / 2)_x = 0,
+# while the forward method discretizes u*u_x directly.
+# These two formulations are equivalent in the continuous equation,
+# but they are not equivalent at the discrete level once steep gradients appear.
+#
+# Therefore, the forward method may fail to approximate the correct weak solution,
+# whereas the Lax method is more appropriate as a conservative reference method.
+# On the other hand, the Lax method is diffusive, so the front is smeared numerically.
+#
+# When A = -0.02, the variation in u is much smaller,
+# so the nonlinear steepening is weaker and the solution changes more gently.
+
+#Figur 1
+# The Burgers solution moves to the right and steepens because the local speed is u.
+# Larger values travel faster, so the right edge compresses and the left edge spreads out.
+# The Lax profile is smeared because of numerical diffusion.
+
+
+#Figur 2
+
+# The Lax and forward solutions differ strongly for A = 1.
+# This shows that discretizing u*u_x directly is not equivalent to using the conservative flux form at the discrete level.
+# The forward method may therefore fail to approximate the correct weak solution
+# or produce an incorrect shock profile.
+
+
+#Figur 3
+
+# For A = -0.02, the variation in u is much smaller, so the nonlinear steepening is weaker.
+# Both solutions stay closer to the initial profile, although they still do not match exactly.
