@@ -1,47 +1,106 @@
-# Pytorch-Hyperbolic-PDE
-Public repository for studying hyperbolic PDEs with PyTorch, including conservation laws, finite difference methods, and numerical experiments.
+# PyTorch Hyperbolic PDE
 
+A research-oriented repository for numerical experiments on **hyperbolic partial differential equations** using **PyTorch**.
 
-# Torch Hyperbolic PDE
+This project focuses on implementing and comparing classical numerical methods for **conservation laws**, with particular attention to:
 
-This is my public repository for studying hyperbolic partial differential equations with PyTorch.
-
-The main focus is on:
-- hyperbolic conservation laws
-- numerical methods for PDEs
+- hyperbolic PDEs
+- linear advection and Burgers' equation
 - finite difference and finite volume ideas
-- stability, CFL conditions, and numerical diffusion
-- experiments with Burgers' equation and linear advection
+- CFL stability and numerical instability
+- numerical diffusion and shock resolution
+- operator splitting methods
 
-## Goals
+The repository is built as a personal computational lab for studying how classical schemes behave in practice, and how implementation choices affect stability, accuracy, and qualitative solution structure.
 
-The purpose of this repository is to collect my notes, code, and numerical experiments while learning and testing methods for hyperbolic PDEs.
+---
 
-In particular, I want to:
-- implement classical numerical schemes in PyTorch
-- compare stability and accuracy of different methods
-- study shock formation, transport, and numerical diffusion
-- build a clean collection of reusable PDE code
+## Motivation
+
+I created this repository to turn PDE theory into working numerical experiments.
+
+Instead of only reading about stability conditions, shock formation, or numerical diffusion, I wanted to:
+
+- implement the schemes myself,
+- test them under different resolutions and CFL numbers,
+- compare their behavior quantitatively and visually,
+- and build reusable code for future work in numerical analysis and scientific computing.
+
+This repository is therefore both a **learning project** and a **research-style coding portfolio**.
+
+---
 
 ## Current Topics
 
-Some of the topics in this repository include:
-- linear advection
-- Burgers' equation
-- FTFS / upwind / backward difference
-- Lax-type methods
-- Rusanov (Riemann-type) methods
-- CFL stability tests
-- resolution studies
+The current repository includes work on:
 
+- **Linear advection**
+  - transport behavior
+  - periodic boundary conditions
+  - stability and instability tests
+  - comparison of finite-difference schemes
+
+- **Burgers' equation**
+  - nonlinear transport
+  - shock formation
+  - comparison of classical schemes
+  - numerical dissipation and total variation behavior
+
+- **Numerical stability analysis**
+  - CFL-based time stepping
+  - stable vs unstable discretizations
+  - behavior under mesh refinement
+
+- **Operator splitting methods**
+  - splitting-based numerical ideas
+  - experimentation with different update structures
+
+---
+
+## Implemented / Explored Methods
+
+Some of the numerical methods explored in this repository include:
+
+- upwind / backward-difference methods
+- FTFS-type and related finite-difference experiments
+- Lax-type methods
+- Rusanov-type fluxes
+- CFL-controlled explicit time stepping
+- resolution studies and stability comparisons
+
+---
+
+## Example Questions Studied
+
+This repository is built around questions such as:
+
+- How does CFL affect stability in explicit schemes?
+- How diffusive is the Lax method compared with Rusanov-type methods?
+- How well do classical methods capture transport, steep gradients, and shocks?
+- What qualitative differences appear as the mesh is refined?
+- How can PyTorch be used as a convenient computational backend for PDE experiments?
+
+---
 
 ## Tech Stack
 
-- Python
-- PyTorch
-- NumPy
-- Matplotlib
+- **Python**
+- **PyTorch**
+- **NumPy**
+- **Matplotlib**
+- Jupyter Notebook
 
-## Status
+---
 
-This repository is a personal work-in-progress and is mainly used for study, experimentation, and project development.
+## Repository Structure
+
+```text
+Pytorch-Hyperbolic-PDE/
+│
+├── notebooks/               # exploratory notebooks and exercise-based experiments
+├── src/                     # reusable numerical methods and helper functions
+├── experiments/             # standalone experiment scripts
+├── results/                 # figures and output plots
+├── README.md
+├── requirements.txt
+└── .gitignore
