@@ -91,16 +91,3 @@ This repository is built around questions such as:
 - Jupyter Notebook
 
 ---
-
-## Repository Structure
-
-```text
-Pytorch-Hyperbolic-PDE/
-│
-├── notebooks/               # exploratory notebooks and exercise-based experiments
-├── src/                     # reusable numerical methods and helper functions
-├── experiments/             # standalone experiment scripts
-├── results/                 # figures and output plots
-├── README.md
-├── requirements.txt
-└── .gitignore
